@@ -37,10 +37,10 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - name: install dependancies
-        run: |
-          python3 -m pip install gcovr
-          git subtree add --squash --prefix=cmake git@github.com:bilke/cmake-modules.git master
+        run: python3 -m pip install gcovr
       - name: configure cmake
         run: cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug
       - name: ========= DEBUG ===========
