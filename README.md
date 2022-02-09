@@ -21,8 +21,27 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j
 ```
 
+## Tests
+Add external cmake modules
+```bash
+git subtree add --squash --prefix=cmake git@github.com:bilke/cmake-modules.git master
+```
+
+Build static lib from source with debug flag set:
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make -j
+```
+
+Run the tests and coverage:
+```bash
+make cov
+```
+
 ## Example
-See [here](examples/README.md) for an example of using the static library.
+See [here](examples) for an example of using the static library.
 
 ## License
 This software is licensed under the terms of the [MIT License](LICENSE)
