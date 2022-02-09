@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(merase LANGUAGES C VERSION "1.0.0" DESCRIPTION "C logger for micro embedded systems")
+project(merase LANGUAGES C CXX VERSION "1.0.0" DESCRIPTION "C logger for micro embedded systems")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 11)
 
 # Detect if the project is being build within a project or standalone.
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -26,9 +27,15 @@ target_compile_options(merase-static PRIVATE -fstack-protector-all -Wextra -Wsha
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     message(STATUS "Building with debug option")
-    message(STATUS "Fetching Cmake modules")
+    message(STATUS "Configuring code coverage")
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-    include(CodeCoverage.cmake)
+    include(cmake/CodeCoverage.cmake)
+    append_coverage_compiler_flags()
+    set(COVERAGE_EXCLUDES "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/main.c" "${PROJECT_SOURCE_DIR}/build/*")
+    setup_target_for_coverage_gcovr_xml(
+        NAME cov
+        EXECUTABLE GTEST_COLOR=1 ctest -V
+    )  
     message(STATUS "Fetching unittest dependancies")
     # setup gtest and fff
     include(FetchContent)
