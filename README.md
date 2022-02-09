@@ -4,10 +4,10 @@
 
 Modified: 2022-02
 
-Micro c logger for micro embedded systems. The name `merase` is derived from [polymerase](https://en.wikipedia.org/wiki/Polymerase), an enzyme responsible for transcribing DNA or MRNA, in other words a genetic logger.
+C logger for micro embedded systems. `Merase` is derived from [polymerase](https://en.wikipedia.org/wiki/Polymerase), an enzyme responsible for transcribing DNA or MRNA, in other words a genetic logger.
 
 ## Build
-Build the static library for merase
+Build the static library:
 ```bash
 git clone https://github.com/ztnel/merase.git
 cd merase
@@ -41,7 +41,7 @@ make cov
 ```
 
 ## Example
-See [here](examples) for an example of using the static library.
+See [here](examples) for an example of using the static library in your project.
 
 ## License
 This software is licensed under the terms of the [MIT License](LICENSE)
