@@ -26,4 +26,29 @@ target_compile_options(merase-static PRIVATE -fstack-protector-all -Wextra -Wsha
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     message(STATUS "Building with debug option")
+    message(STATUS "Fetching Cmake modules")
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+    include(CodeCoverage.cmake)
+    message(STATUS "Fetching unittest dependancies")
+    # setup gtest and fff
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
+    )
+    FetchContent_Declare(
+        fff
+        GIT_REPOSITORY https://github.com/meekrosoft/fff
+        GIT_TAG v1.1 
+    )
+    FetchContent_MakeAvailable(googletest)
+    FetchContent_GetProperties(fff)
+    # remove gtest confliction
+    if(NOT fff_POPULATED)
+        FetchContent_Populate(fff)
+        file(REMOVE_RECURSE ${fff_SOURCE_DIR}/gtest)
+    endif()
+    enable_testing()
+    add_subdirectory(tests)
 endif()
