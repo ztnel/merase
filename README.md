@@ -22,9 +22,9 @@ make -j
 ```
 
 ## Tests
-Add external cmake modules
+Clone the project recursively or run `git submodule init` followed by `git submodule update` to fetch the submodule source
 ```bash
-git subtree add --squash --prefix=cmake git@github.com:bilke/cmake-modules.git master
+git clone --recurse-submodules https://github.com/ztnel/merase.git
 ```
 
 Build static lib from source with debug flag set:
