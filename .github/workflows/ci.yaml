@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'true'
+          submodules: true
       - name: install dependancies
         run: python3 -m pip install gcovr
       - name: configure cmake
