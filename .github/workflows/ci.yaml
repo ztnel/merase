@@ -30,3 +30,46 @@ jobs:
         with:
           name: libmerase-static.a
           path: ${{github.workspace}}/build/*.a
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependancies
+        run: python3 -m pip install gcovr
+      - name: configure cmake
+        run: cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug
+      - name: ========= DEBUG ===========
+        run: tree
+      - name: build
+        working-directory: build
+        run: make -j 
+      - name: test
+        working-directory: build
+        run: GTEST_OUTPUT=xml:results/ GTEST_COLOR=1 ctest -V
+      - name: Upload test results on failure
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: results_xml
+          path: ${{github.workspace}}/build/results/**/*.xml
+      - name: gcov
+        working-directory: build
+        run: make cov
+      - name: codecov push
+        uses: codecov/codecov-action@v1
+        with:
+          files: ${{github.workspace}}/build/cov.xml
+  cppcheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: install cppcheck
+        run: sudo apt install cppcheck -y
+      - name: Execute cppcheck
+        run: cppcheck src include
