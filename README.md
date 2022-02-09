@@ -1,6 +1,6 @@
 # Merase
 
-[![ci](https://github.com/ztnel/merase/actions/workflows/ci.yaml/badge.svg)](https://github.com/ztnel/merase/actions/workflows/ci.yaml)
+[![ci](https://github.com/ztnel/merase/actions/workflows/ci.yaml/badge.svg)](https://github.com/ztnel/merase/actions/workflows/ci.yaml) [![codecov](https://codecov.io/gh/ztnel/merase/branch/master/graph/badge.svg?token=6Q7DKCSAVU)](https://codecov.io/gh/ztnel/merase)
 
 Modified: 2022-02
 
