@@ -36,11 +36,18 @@ add_library(merase-static STATIC ${MERASE_SRC})
 target_include_directories(merase-static PRIVATE ${MERASE_INCLUDE})
 target_compile_options(merase-static PRIVATE -fstack-protector-all -Wextra -Wshadow -Wconversion -Wformat -Wundef -fno-common -O3 -g3)
 
-if(CMAKE_BUILD_TYPE MATCHES "Debug" AND ${STANDALONE})
+if(CMAKE_BUILD_TYPE MATCHES "Debug" AND ${STANDALONE})  
   message(STATUS "Building ${PROJECT_NAME} with debug option")
+  include(FetchContent)
   message(STATUS "Configuring code coverage")
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-  include(cmake/CodeCoverage.cmake)
+  # Setup coverage with gcov
+  FetchContent_Declare(
+    cmake 
+    GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
+    GIT_TAG        770145a3338408bff34e2e7bdec15ee4e4ae2b79
+  )
+  FetchContent_MakeAvailable(cmake)
+  include(${CMAKE_BINARY_DIR}/_deps/cmake-src/CodeCoverage.cmake)
   append_coverage_compiler_flags()
   set(COVERAGE_EXCLUDES "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/main.c" "${PROJECT_SOURCE_DIR}/build/*")
   setup_target_for_coverage_gcovr_xml(
