@@ -22,9 +22,9 @@ make -j
 ```
 
 ## Tests
-Clone the project recursively or run `git submodule init` followed by `git submodule update` to fetch the submodule source
+Clone the project: 
 ```bash
-git clone --recurse-submodules https://github.com/ztnel/merase.git
+git clone https://github.com/ztnel/merase.git
 ```
 
 Build static lib from source with debug flag set:
