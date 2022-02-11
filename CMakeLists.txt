@@ -26,10 +26,11 @@ else()
 endif()
 
 if (NOT ${STANDALONE})
-    set(MERASE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+  set(MERASE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+  option(CMAKE_BUILD_TYPE "Specify cmake build type [ Release | Debug ]" OFF)
+else()
+  option(CMAKE_BUILD_TYPE "Specify cmake build type [ Release | Debug ]" ON)
 endif()
-
-option(CMAKE_BUILD_TYPE "Specify cmake build type [ Release | Debug ]" ON)
 
 set(MERASE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/merase.c)
 set(MERASE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
