@@ -20,6 +20,7 @@ extern "C" {
 
 DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC_VARARG(int, fprintf, FILE *, const char *, ...);
+FAKE_VALUE_FUNC1(int, fflush, FILE *);
 
 class TestMerase : public testing::Test {
   public:
@@ -32,20 +33,35 @@ class TestMerase : public testing::Test {
 };
 
 TEST_F(TestMerase, TestGetSetLogLevel) {
-  logger_set_level(INFO);
-  ASSERT_EQ(logger_get_level(), INFO);
+  for (int i=TRACE; i <= DISABLE; i++) {
+    logger_set_level((Level)i);
+    ASSERT_EQ(logger_get_level(), (Level)i);
+  }
 }
 
 TEST_F(TestMerase, TestLogFiltering) {
-  logger_set_level(WARNING);
-  _info("filtration test %d", 1);
-  ASSERT_EQ(fprintf_fake.call_count, 0);
-}
-
-TEST_F(TestMerase, TestDisable) {
-  const char* msg = "disable log test %d";
-  _critical(msg, 1);
-  ASSERT_EQ(fprintf_fake.call_count, 0);
+  const char* fmt = "filtration test";
+  for (int i=TRACE; i <= DISABLE; i++) {
+    logger_set_level((Level)i);
+    switch (i) {
+      case INFO:
+        _trace(fmt);
+        break;
+      case WARNING:
+        _info(fmt);
+        break;
+      case ERROR:
+        _warning(fmt);
+        break;
+      case CRITICAL:
+        _error(fmt);
+        break;
+      case DISABLE:
+        _critical(fmt);
+        break;
+    }
+    ASSERT_EQ(fprintf_fake.call_count, 0);
+  }
 }
 
 TEST_F(TestMerase, TestTraceLog) {
