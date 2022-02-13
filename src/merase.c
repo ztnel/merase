@@ -107,9 +107,10 @@ void _critical(const char* fmt, ...) {
  */
 void _log(enum Level level, const char* fmt, va_list argp) {
   // filter output by log level
-  if (_level <= level) {
-    out(level, fmt, argp);
+  if (_level > level) {
+    return;
   }
+  out(level, fmt, argp);
 }
 
 /**
@@ -141,6 +142,8 @@ void out(enum Level level, const char* fmt, va_list argp) {
       break;
     case CRITICAL:
       fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
+      break;
+    default:
       break;
   }
   fflush(stderr);
