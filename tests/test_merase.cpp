@@ -10,9 +10,9 @@
  */
 
 #include <gtest/gtest.h>
-#include <fff.h>
 
 extern "C" {
+  #include <fff.h>
   #include <stdio.h>
   #include "merase.h"
 }
@@ -26,10 +26,10 @@ class TestMerase : public testing::Test {
   public:
     void SetUp() {
       RESET_FAKE(fprintf);
+      RESET_FAKE(fflush);
       FFF_RESET_HISTORY();
       logger_set_level(DISABLE);
     }
-    void TearDown() {}
 };
 
 TEST_F(TestMerase, TestGetSetLogLevel) {
