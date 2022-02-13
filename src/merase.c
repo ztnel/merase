@@ -122,7 +122,7 @@ static void _log(enum Level level, const char* fmt, va_list argp) {
  * @param argp arguments passed to string formatter
  */
 static void out(enum Level level, const char* fmt, va_list argp) {
-  char buffer[256];
+  char buffer[256] = "";
   time_t now = time(NULL);
   // set buffer with format string populated with arguments from argp
   vsnprintf(buffer, sizeof(buffer), fmt, argp);
