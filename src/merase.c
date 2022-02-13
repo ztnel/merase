@@ -92,7 +92,6 @@ void _error(const char* fmt, ...) {
  * @param ... variable arguments for string fmt
  */
 void _critical(const char* fmt, ...) {
-  int test;
   va_list args;
   va_start(args, fmt);
   _log(CRITICAL, fmt, args);
