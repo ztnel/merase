@@ -22,8 +22,6 @@ enum Level {
   DISABLE
 };
 
-// program log level (disable by default)
-static enum Level _level = DISABLE;
 
 enum Level logger_get_level();
 void logger_set_level(enum Level level);
@@ -32,8 +30,6 @@ void _info(const char* fmt, ...);
 void _warning(const char* fmt, ...);
 void _error(const char* fmt, ...);
 void _critical(const char* fmt, ...);
-static void _log(enum Level level, const char* fmt, va_list argp);
-static void out(enum Level level, const char* fmt, va_list argp);
 
 #ifndef critical
 #define critical(...) CRITICAL(__VA_ARGS__, "")

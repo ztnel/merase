@@ -14,6 +14,12 @@
 #include <time.h>
 #include "merase.h"
 
+// program log level (disable by default)
+static enum Level _level = DISABLE;
+
+static void _log(enum Level level, const char* fmt, va_list argp);
+static void out(enum Level level, const char* fmt, va_list argp);
+
 /**
  * @brief Set the program log level
  * 
