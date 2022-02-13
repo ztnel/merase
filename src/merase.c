@@ -89,7 +89,7 @@ void _error(const char* fmt, ...) {
  * @brief critical log endpoint
  * 
  * @param fmt format string
- * @param ... variable arguments
+ * @param ... variable arguments for string fmt
  */
 void _critical(const char* fmt, ...) {
   va_list args;
@@ -105,11 +105,12 @@ void _critical(const char* fmt, ...) {
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-void _log(enum Level level, const char* fmt, va_list argp) {
+static void _log(enum Level level, const char* fmt, va_list argp) {
   // filter output by log level
-  if (_level <= level) {
-    out(level, fmt, argp);
+  if (_level > level) {
+    return;
   }
+  out(level, fmt, argp);
 }
 
 /**
@@ -120,8 +121,8 @@ void _log(enum Level level, const char* fmt, va_list argp) {
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-void out(enum Level level, const char* fmt, va_list argp) {
-  char buffer[256];
+static void out(enum Level level, const char* fmt, va_list argp) {
+  char buffer[256] = "";
   time_t now = time(NULL);
   // set buffer with format string populated with arguments from argp
   vsnprintf(buffer, sizeof(buffer), fmt, argp);
@@ -139,7 +140,7 @@ void out(enum Level level, const char* fmt, va_list argp) {
     case ERROR:
       fprintf(stderr, "%lis [ERROR] %s\n\r", now, buffer);
       break;
-    case CRITICAL:
+    default:
       fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
       break;
   }
