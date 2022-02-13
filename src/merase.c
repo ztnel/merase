@@ -140,10 +140,8 @@ static void out(enum Level level, const char* fmt, va_list argp) {
     case ERROR:
       fprintf(stderr, "%lis [ERROR] %s\n\r", now, buffer);
       break;
-    case CRITICAL:
-      fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
-      break;
     default:
+      fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
       break;
   }
   fflush(stderr);
