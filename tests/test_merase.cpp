@@ -26,7 +26,7 @@ class TestMerase : public testing::Test {
     void SetUp() {
       RESET_FAKE(fprintf);
       FFF_RESET_HISTORY();
-      logger_set_level(TRACE);
+      logger_set_level(DISABLE);
     }
     void TearDown() {}
 };
@@ -42,7 +42,14 @@ TEST_F(TestMerase, TestLogFiltering) {
   ASSERT_EQ(fprintf_fake.call_count, 0);
 }
 
+TEST_F(TestMerase, TestDisable) {
+  const char* msg = "disable log test %d";
+  _critical(msg, 1);
+  ASSERT_EQ(fprintf_fake.call_count, 0);
+}
+
 TEST_F(TestMerase, TestTraceLog) {
+  logger_set_level(TRACE);
   const char* msg = "trace log test %d";
   _trace(msg, 1);
   ASSERT_EQ(fprintf_fake.call_count, 1);
@@ -50,6 +57,7 @@ TEST_F(TestMerase, TestTraceLog) {
 }
 
 TEST_F(TestMerase, TestInfoLog) {
+  logger_set_level(INFO);
   const char* msg = "info log test %d";
   _info(msg, 1);
   ASSERT_EQ(fprintf_fake.call_count, 1);
@@ -57,6 +65,7 @@ TEST_F(TestMerase, TestInfoLog) {
 }
 
 TEST_F(TestMerase, TestWarningLog) {
+  logger_set_level(WARNING);
   const char* msg = "warning log test %d";
   _warning(msg, 1);
   ASSERT_EQ(fprintf_fake.call_count, 1);
@@ -64,6 +73,7 @@ TEST_F(TestMerase, TestWarningLog) {
 }
 
 TEST_F(TestMerase, TestErrorLog) {
+  logger_set_level(ERROR);
   const char* msg = "error log test %d";
   _error(msg, 1);
   ASSERT_EQ(fprintf_fake.call_count, 1);
@@ -71,6 +81,7 @@ TEST_F(TestMerase, TestErrorLog) {
 }
 
 TEST_F(TestMerase, TestCriticalLog) {
+  logger_set_level(CRITICAL);
   const char* msg = "critical log test %d";
   _critical(msg, 1);
   ASSERT_EQ(fprintf_fake.call_count, 1);
