@@ -15,13 +15,14 @@ extern "C" {
   #include <fff.h>
   #include <stdio.h>
   #include <pthread.h>
+  #include <stdarg.h>
   #include "merase.h"
 }
 
 
 DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC_VARARG(int, fprintf, FILE *, const char *, ...);
-FAKE_VALUE_FUNC3(int, vfprintf, FILE *, const char *, char *);
+FAKE_VALUE_FUNC3(int, vfprintf, FILE *, const char *, va_list);
 FAKE_VALUE_FUNC1(int, fflush, FILE *);
 FAKE_VALUE_FUNC1(int, pthread_mutex_lock, pthread_mutex_t *)
 FAKE_VALUE_FUNC1(int, pthread_mutex_unlock, pthread_mutex_t *)
