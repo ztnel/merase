@@ -12,13 +12,20 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+#include <pthread.h>
 #include "merase.h"
+
+struct __std_level {
+  FILE* fp;
+  const char *repr;
+};
 
 // program log level (disable by default)
 static enum Level _level = DISABLE;
-
+static pthread_mutex_t s_mutx;
+static char *get_level_str(enum Level level);
 static void _log(enum Level level, const char* fmt, va_list argp);
-static void out(enum Level level, const char* fmt, va_list argp);
+static void out(struct __std_level *stdl, const char* fmt, va_list argp);
 
 /**
  * @brief Set the program log level
@@ -116,40 +123,46 @@ static void _log(enum Level level, const char* fmt, va_list argp) {
   if (_level > level) {
     return;
   }
-  out(level, fmt, argp);
+  struct __std_level stdl;
+  if (level >= ERROR) {
+    stdl.fp = stderr;
+  } else {
+    stdl.fp = stdout;
+  }
+  stdl.repr = get_level_str(level);
+  out(&stdl, fmt, argp);
 }
 
 /**
- * @brief String formatting and output function. Output to stderr for ERROR and
- * CRITICAL logs.
+ * @brief Get the string representation of log level enum
+ * 
+ * @param level log level
+ * @return char* 
+ */
+static char *get_level_str(enum Level level) {
+  switch (level) {
+    case TRACE: return "TRACE";
+    case INFO: return "INFO";
+    case WARNING: return "WARN";
+    case ERROR: return "ERROR";
+    case CRITICAL: return "CRIT";
+    default: return "NULL";
+  }
+}
+
+/**
+ * @brief Pre log message formatting and file write function
  * 
  * @param level log level
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-static void out(enum Level level, const char* fmt, va_list argp) {
-  char buffer[256] = "";
+static void out(struct __std_level *stdl, const char *fmt, va_list argp) {
   time_t now = time(NULL);
-  // set buffer with format string populated with arguments from argp
-  vsnprintf(buffer, sizeof(buffer), fmt, argp);
-  // print log level tag to stdout or stderr
-  switch (level) {
-    case TRACE:
-      fprintf(stdout, "%lis [TRACE] %s\n\r", now, buffer);
-      break;
-    case INFO:
-      fprintf(stdout, "%lis [INFO] %s\n\r", now, buffer);
-      break;
-    case WARNING:
-      fprintf(stdout, "%lis [WARNING] %s\n\r", now, buffer);
-      break;
-    case ERROR:
-      fprintf(stderr, "%lis [ERROR] %s\n\r", now, buffer);
-      break;
-    default:
-      fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
-      break;
-  }
-  fflush(stderr);
-  fflush(stdout);
+  pthread_mutex_lock(&s_mutx);
+  fprintf(stdl->fp, "%ld [%s]\t", now, stdl->repr);
+  vfprintf(stdl->fp, fmt, argp);
+  fprintf(stdl->fp, "\n\r");
+  fflush(stdl->fp);
+  pthread_mutex_unlock(&s_mutx);
 }
