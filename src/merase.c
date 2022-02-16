@@ -15,17 +15,20 @@
 #include <pthread.h>
 #include "merase.h"
 
-struct __std_level {
+struct __std_log {
   FILE* fp;
+  int line;
+  va_list argp;
+  const char* fmt;
   const char *repr;
+  const char *func;
 };
 
 // program log level (disable by default)
 static enum Level _level = DISABLE;
 static pthread_mutex_t s_mutx;
 static char *get_level_str(enum Level level);
-static void _log(enum Level level, const char* fmt, va_list argp);
-static void out(struct __std_level *stdl, const char* fmt, va_list argp);
+static void out(struct __std_log *stdl);
 
 /**
  * @brief Set the program log level
@@ -46,91 +49,32 @@ enum Level logger_get_level() {
 }
 
 /**
- * @brief trace log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _trace(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(TRACE, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief info log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _info(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(INFO, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief warning log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _warning(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(WARNING, fmt, args);
-  va_end(args);
-}
-
-
-/**
- * @brief error log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _error(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(ERROR, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief critical log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments for string fmt
- */
-void _critical(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(CRITICAL, fmt, args);
-  va_end(args);
-}
-
-/**
  * @brief Filter logs by log level.
  * 
  * @param level log level
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-static void _log(enum Level level, const char* fmt, va_list argp) {
+void _log(enum Level level, const char* func, int line, const char* fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
   // filter output by log level
   if (_level > level) {
     return;
   }
-  struct __std_level stdl;
+  struct __std_log stdl;
   if (level >= ERROR) {
     stdl.fp = stderr;
   } else {
     stdl.fp = stdout;
   }
   stdl.repr = get_level_str(level);
-  out(&stdl, fmt, argp);
+  stdl.argp = args;
+  stdl.fmt = fmt;
+  stdl.func = func;
+  stdl.line = line;
+  out(&stdl);
+  va_end(args);
 }
 
 /**
@@ -157,12 +101,14 @@ static char *get_level_str(enum Level level) {
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-static void out(struct __std_level *stdl, const char *fmt, va_list argp) {
+static void out(struct __std_log *stdl) {
   time_t now = time(NULL);
+  FILE *fp = stdl->fp;
   pthread_mutex_lock(&s_mutx);
-  fprintf(stdl->fp, "%ld [%s]\t", now, stdl->repr);
-  vfprintf(stdl->fp, fmt, argp);
-  fprintf(stdl->fp, "\n\r");
-  fflush(stdl->fp);
+  fprintf(fp, "%ld [%s]\t %s:%i ",
+    now, stdl->repr, stdl->func, stdl->line);
+  vfprintf(fp, stdl->fmt, stdl->argp);
+  fprintf(fp, "\n\r");
+  fflush(fp);
   pthread_mutex_unlock(&s_mutx);
 }
