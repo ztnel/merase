@@ -95,8 +95,7 @@ static char *_get_level_str(enum Level level) {
     case INFO: return "INFO";
     case WARNING: return "WARN";
     case ERROR: return "ERROR";
-    case CRITICAL: return "CRIT";
-    default: return "NULL";
+    default: return "CRIT";
   }
 }
 
