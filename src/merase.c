@@ -16,10 +16,10 @@
 #include "merase.h"
 
 struct __std_log {
-  FILE* fp;
+  FILE *fp;
   int line;
-  va_list argp;
-  const char* fmt;
+  va_list *argp;
+  const char *fmt;
   const char *repr;
   const char *func;
 };
@@ -69,7 +69,7 @@ void merase_log(enum Level level, const char* func, int line, const char* fmt, .
     stdl.fp = stdout;
   }
   stdl.repr = _get_level_str(level);
-  stdl.argp = args;
+  stdl.argp = &args;
   stdl.fmt = fmt;
   stdl.func = func;
   stdl.line = line;
@@ -107,7 +107,7 @@ static void _out(struct __std_log *stdl) {
   pthread_mutex_lock(&s_mutx);
   fprintf(fp, "%ld [%s]\t %s:%i ",
     now, stdl->repr, stdl->func, stdl->line);
-  vfprintf(fp, stdl->fmt, stdl->argp);
+  vfprintf(fp, stdl->fmt, *stdl->argp);
   fprintf(fp, "\n\r");
   fflush(fp);
   pthread_mutex_unlock(&s_mutx);
