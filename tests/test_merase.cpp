@@ -59,67 +59,27 @@ TEST_F(TestMerase, TestLogFiltering) {
   }
 }
 
-TEST_F(TestMerase, TestTraceLog) {
-  merase_set_level(TRACE);
+TEST_F(TestMerase, TestLogging) {
   const char *fmt = "%d";
-  merase_log(TRACE, __func__, __LINE__, fmt, 1);
-  ASSERT_EQ(vfprintf_fake.call_count, 1);
-  ASSERT_EQ(vfprintf_fake.arg0_val, stdout);
-  ASSERT_EQ(fprintf_fake.arg0_history[0], stdout);
-  ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-  ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-  ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
-  ASSERT_EQ(time_fake.call_count, 1);
-}
-
-TEST_F(TestMerase, TestInfoLog) {
-  merase_set_level(INFO);
-  const char *fmt = "%d";
-  merase_log(INFO, __func__, __LINE__, fmt, 1);
-  ASSERT_EQ(vfprintf_fake.call_count, 1);
-  ASSERT_EQ(vfprintf_fake.arg0_val, stdout);
-  ASSERT_EQ(fprintf_fake.arg0_history[0], stdout);
-  ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-  ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-  ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
-  ASSERT_EQ(time_fake.call_count, 1);
-}
-
-TEST_F(TestMerase, TestWarningLog) {
-  merase_set_level(WARNING);
-  const char *fmt = "%d";
-  merase_log(WARNING, __func__, __LINE__, fmt, 1);
-  ASSERT_EQ(vfprintf_fake.call_count, 1);
-  ASSERT_EQ(vfprintf_fake.arg0_val, stdout);
-  ASSERT_EQ(fprintf_fake.arg0_history[0], stdout);
-  ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-  ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-  ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
-  ASSERT_EQ(time_fake.call_count, 1);
-}
-
-TEST_F(TestMerase, TestErrorLog) {
-  merase_set_level(ERROR);
-  const char *fmt = "%d";
-  merase_log(ERROR, __func__, __LINE__, fmt, 1);
-  ASSERT_EQ(vfprintf_fake.call_count, 1);
-  ASSERT_EQ(vfprintf_fake.arg0_val, stderr);
-  ASSERT_EQ(fprintf_fake.arg0_history[0], stderr);
-  ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-  ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-  ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
-  ASSERT_EQ(time_fake.call_count, 1);
-}
-
-TEST_F(TestMerase, TestCriticalLog) {
-  merase_set_level(CRITICAL);
-  const char *fmt = "%d";
-  merase_log(CRITICAL, __func__, __LINE__, fmt, 1);
-  ASSERT_EQ(vfprintf_fake.call_count, 1);
-  ASSERT_EQ(vfprintf_fake.arg0_val, stderr);
-  ASSERT_EQ(fprintf_fake.arg0_history[0], stderr);
-  ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-  ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-  ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
-  ASSERT_EQ(time_fake.call_count, 1);
+  for (int i = CRITICAL; i >= TRACE; i--) {
+    Level level = (Level)i;
+    FILE *fp = level < 3 ? stdout : stderr;
+    merase_set_level(level);
+    merase_log(level, __func__, __LINE__, fmt, 1);
+    ASSERT_EQ(vfprintf_fake.call_count, 1);
+    ASSERT_EQ(vfprintf_fake.arg0_val, fp);
+    ASSERT_EQ(fprintf_fake.arg0_history[0], fp);
+    ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
+    ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
+    ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
+    ASSERT_EQ(time_fake.call_count, 1);
+    ASSERT_EQ(fflush_fake.call_count, 1);
+    ASSERT_EQ(fflush_fake.arg0_val, fp);
+    RESET_FAKE(fprintf);
+    RESET_FAKE(fflush);
+    RESET_FAKE(time);
+    RESET_FAKE(vfprintf);
+    RESET_FAKE(pthread_mutex_lock);
+    RESET_FAKE(pthread_mutex_unlock);
+  }
 }
