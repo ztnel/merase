@@ -25,40 +25,36 @@ enum Level {
 
 enum Level logger_get_level();
 void logger_set_level(enum Level level);
-void _trace(const char *fmt, ...);
-void _info(const char *fmt, ...);
-void _warning(const char *fmt, ...);
-void _error(const char *fmt, ...);
-void _critical(const char *fmt, ...);
+void _log(enum Level level, const char* func, int line, const char* fmt, ...);
 
 #ifndef critical
-#define critical(...) CRITICAL(__VA_ARGS__, "")
-#define CRITICAL(fmt, ...) \
-  _critical("%s:%i " fmt " %s", __func__, __LINE__, __VA_ARGS__)
+#define critical(...) __CRITICAL(__VA_ARGS__, "")
+#define __CRITICAL(fmt, ...) \
+  _log(CRITICAL, __func__, __LINE__, fmt, __VA_ARGS__)
 #endif
 
 #ifndef error
-#define error(...) ERROR(__VA_ARGS__, "")
-#define ERROR(fmt, ...) \
-  _error("%s:%i " fmt " %s", __func__, __LINE__, __VA_ARGS__)
+#define error(...) __ERROR(__VA_ARGS__, "")
+#define __ERROR(fmt, ...) \
+  _log(ERROR, __func__, __LINE__, fmt, __VA_ARGS__)
 #endif
 
 #ifndef warning
-#define warning(...) WARNING(__VA_ARGS__, "")
-#define WARNING(fmt, ...) \
-  _warning("%s:%i " fmt " %s", __func__, __LINE__, __VA_ARGS__)
+#define warning(...) __WARNING(__VA_ARGS__, "")
+#define __WARNING(fmt, ...) \
+  _log(WARNING, __func__, __LINE__, fmt, __VA_ARGS__)
 #endif
 
 #ifndef info
-#define info(...) INFO(__VA_ARGS__, "")
-#define INFO(fmt, ...) \
-  _info("%s:%i " fmt " %s", __func__, __LINE__, __VA_ARGS__)
+#define info(...) __INFO(__VA_ARGS__, "")
+#define __INFO(fmt, ...) \
+  _log(INFO, __func__, __LINE__, fmt, __VA_ARGS__)
 #endif
 
 #ifndef trace
-#define trace(...) TRACE(__VA_ARGS__, "")
-#define TRACE(fmt, ...) \
-  _trace("%s:%i " fmt " %s", __func__, __LINE__, __VA_ARGS__)
+#define trace(...) __TRACE(__VA_ARGS__, "")
+#define __TRACE(fmt, ...) \
+  _log(TRACE, __func__, __LINE__, fmt, __VA_ARGS__)
 #endif
 
 #endif  // MERASE_H_
