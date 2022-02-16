@@ -12,20 +12,34 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+#include <pthread.h>
 #include "merase.h"
+
+/**
+ * @brief Standard logging struct
+ * 
+ */
+struct __std_log {
+  FILE *fp;
+  int line;
+  va_list *argp;
+  const char *fmt;
+  const char *repr;
+  const char *func;
+};
 
 // program log level (disable by default)
 static enum Level _level = DISABLE;
-
-static void _log(enum Level level, const char* fmt, va_list argp);
-static void out(enum Level level, const char* fmt, va_list argp);
+static pthread_mutex_t s_mutx;
+static char *_get_level_str(enum Level level);
+static void _out(struct __std_log *stdl);
 
 /**
  * @brief Set the program log level
  * 
  * @param level target logging level
  */
-void logger_set_level(enum Level level) {
+void merase_set_level(enum Level level) {
   _level = level;
 }
 
@@ -34,122 +48,70 @@ void logger_set_level(enum Level level) {
  * 
  * @return enum Level 
  */
-enum Level logger_get_level() {
+enum Level merase_get_level() {
   return _level;
 }
 
 /**
- * @brief trace log endpoint
+ * @brief Perform log filtration and standard log construction parsing variable arguments
  * 
- * @param fmt format string
- * @param ... variable arguments
+ * @param level log level enum
+ * @param func macro expanded log containing function name
+ * @param line macro expanded log line
+ * @param fmt log string formatter
+ * @param ... variable arguments for string formatter
  */
-void _trace(const char* fmt, ...) {
+void merase_log(enum Level level, const char* func, int line, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  _log(TRACE, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief info log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _info(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(INFO, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief warning log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _warning(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(WARNING, fmt, args);
-  va_end(args);
-}
-
-
-/**
- * @brief error log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments
- */
-void _error(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(ERROR, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief critical log endpoint
- * 
- * @param fmt format string
- * @param ... variable arguments for string fmt
- */
-void _critical(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  _log(CRITICAL, fmt, args);
-  va_end(args);
-}
-
-/**
- * @brief Filter logs by log level.
- * 
- * @param level log level
- * @param fmt format string
- * @param argp arguments passed to string formatter
- */
-static void _log(enum Level level, const char* fmt, va_list argp) {
   // filter output by log level
   if (_level > level) {
     return;
   }
-  out(level, fmt, argp);
+  struct __std_log stdl;
+  if (level >= ERROR) {
+    stdl.fp = stderr;
+  } else {
+    stdl.fp = stdout;
+  }
+  stdl.repr = _get_level_str(level);
+  stdl.argp = &args;
+  stdl.fmt = fmt;
+  stdl.func = func;
+  stdl.line = line;
+  _out(&stdl);
+  va_end(args);
 }
 
 /**
- * @brief String formatting and output function. Output to stderr for ERROR and
- * CRITICAL logs.
+ * @brief Get the string representation of log level enum
  * 
- * @param level log level
- * @param fmt format string
- * @param argp arguments passed to string formatter
+ * @param level log level enum
+ * @return char* 
  */
-static void out(enum Level level, const char* fmt, va_list argp) {
-  char buffer[256] = "";
-  time_t now = time(NULL);
-  // set buffer with format string populated with arguments from argp
-  vsnprintf(buffer, sizeof(buffer), fmt, argp);
-  // print log level tag to stdout or stderr
+static char *_get_level_str(enum Level level) {
   switch (level) {
-    case TRACE:
-      fprintf(stdout, "%lis [TRACE] %s\n\r", now, buffer);
-      break;
-    case INFO:
-      fprintf(stdout, "%lis [INFO] %s\n\r", now, buffer);
-      break;
-    case WARNING:
-      fprintf(stdout, "%lis [WARNING] %s\n\r", now, buffer);
-      break;
-    case ERROR:
-      fprintf(stderr, "%lis [ERROR] %s\n\r", now, buffer);
-      break;
-    default:
-      fprintf(stderr, "%lis [CRITICAL] %s\n\r", now, buffer);
-      break;
+    case TRACE: return "TRACE";
+    case INFO: return "INFO";
+    case WARNING: return "WARN";
+    case ERROR: return "ERROR";
+    default: return "CRIT";
   }
-  fflush(stderr);
-  fflush(stdout);
+}
+
+/**
+ * @brief Static IO output function for log message
+ * 
+ * @param stdl standard log out struct containing log metrics
+ */
+static void _out(struct __std_log *stdl) {
+  time_t now = time(NULL);
+  FILE *fp = stdl->fp;
+  pthread_mutex_lock(&s_mutx);
+  fprintf(fp, "%ld [%s]\t %s:%i ",
+    now, stdl->repr, stdl->func, stdl->line);
+  vfprintf(fp, stdl->fmt, *stdl->argp);
+  fprintf(fp, "\n\r");
+  fflush(fp);
+  pthread_mutex_unlock(&s_mutx);
 }
