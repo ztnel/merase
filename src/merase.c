@@ -27,15 +27,15 @@ struct __std_log {
 // program log level (disable by default)
 static enum Level _level = DISABLE;
 static pthread_mutex_t s_mutx;
-static char *get_level_str(enum Level level);
-static void out(struct __std_log *stdl);
+static char *_get_level_str(enum Level level);
+static void _out(struct __std_log *stdl);
 
 /**
  * @brief Set the program log level
  * 
  * @param level target logging level
  */
-void logger_set_level(enum Level level) {
+void merase_set_level(enum Level level) {
   _level = level;
 }
 
@@ -44,7 +44,7 @@ void logger_set_level(enum Level level) {
  * 
  * @return enum Level 
  */
-enum Level logger_get_level() {
+enum Level merase_get_level() {
   return _level;
 }
 
@@ -55,7 +55,7 @@ enum Level logger_get_level() {
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-void _log(enum Level level, const char* func, int line, const char* fmt, ...) {
+void merase_log(enum Level level, const char* func, int line, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
   // filter output by log level
@@ -68,12 +68,12 @@ void _log(enum Level level, const char* func, int line, const char* fmt, ...) {
   } else {
     stdl.fp = stdout;
   }
-  stdl.repr = get_level_str(level);
+  stdl.repr = _get_level_str(level);
   stdl.argp = args;
   stdl.fmt = fmt;
   stdl.func = func;
   stdl.line = line;
-  out(&stdl);
+  _out(&stdl);
   va_end(args);
 }
 
@@ -83,7 +83,7 @@ void _log(enum Level level, const char* func, int line, const char* fmt, ...) {
  * @param level log level
  * @return char* 
  */
-static char *get_level_str(enum Level level) {
+static char *_get_level_str(enum Level level) {
   switch (level) {
     case TRACE: return "TRACE";
     case INFO: return "INFO";
@@ -101,7 +101,7 @@ static char *get_level_str(enum Level level) {
  * @param fmt format string
  * @param argp arguments passed to string formatter
  */
-static void out(struct __std_log *stdl) {
+static void _out(struct __std_log *stdl) {
   time_t now = time(NULL);
   FILE *fp = stdl->fp;
   pthread_mutex_lock(&s_mutx);
