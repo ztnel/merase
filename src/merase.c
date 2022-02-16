@@ -15,6 +15,10 @@
 #include <pthread.h>
 #include "merase.h"
 
+/**
+ * @brief Standard logging struct
+ * 
+ */
 struct __std_log {
   FILE *fp;
   int line;
@@ -49,11 +53,13 @@ enum Level merase_get_level() {
 }
 
 /**
- * @brief Filter logs by log level.
+ * @brief Perform log filtration and standard log construction parsing variable arguments
  * 
- * @param level log level
- * @param fmt format string
- * @param argp arguments passed to string formatter
+ * @param level log level enum
+ * @param func macro expanded log containing function name
+ * @param line macro expanded log line
+ * @param fmt log string formatter
+ * @param ... variable arguments for string formatter
  */
 void merase_log(enum Level level, const char* func, int line, const char* fmt, ...) {
   va_list args;
@@ -80,7 +86,7 @@ void merase_log(enum Level level, const char* func, int line, const char* fmt, .
 /**
  * @brief Get the string representation of log level enum
  * 
- * @param level log level
+ * @param level log level enum
  * @return char* 
  */
 static char *_get_level_str(enum Level level) {
@@ -95,11 +101,9 @@ static char *_get_level_str(enum Level level) {
 }
 
 /**
- * @brief Pre log message formatting and file write function
+ * @brief Static IO output function for log message
  * 
- * @param level log level
- * @param fmt format string
- * @param argp arguments passed to string formatter
+ * @param stdl standard log out struct containing log metrics
  */
 static void _out(struct __std_log *stdl) {
   time_t now = time(NULL);
