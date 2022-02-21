@@ -70,8 +70,6 @@ TEST_F(TestMerase, TestLogging) {
     ASSERT_EQ(vfprintf_fake.arg0_val, fp);
     ASSERT_EQ(fprintf_fake.arg0_history[0], fp);
     ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-    ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-    ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
     ASSERT_EQ(time_fake.call_count, 1);
     ASSERT_EQ(fflush_fake.call_count, 1);
     ASSERT_EQ(fflush_fake.arg0_val, fp);
@@ -79,7 +77,5 @@ TEST_F(TestMerase, TestLogging) {
     RESET_FAKE(fflush);
     RESET_FAKE(time);
     RESET_FAKE(vfprintf);
-    RESET_FAKE(pthread_mutex_lock);
-    RESET_FAKE(pthread_mutex_unlock);
   }
 }
