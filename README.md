@@ -4,7 +4,7 @@
 
 Modified: 2022-02
 
-C logger for embedded systems. `Merase` is derived from [polymerase](https://en.wikipedia.org/wiki/Polymerase), an enzyme responsible for transcribing DNA or MRNA, in other words a genetic logger.
+A simple C logger. `Merase` is derived from [polymerase](https://en.wikipedia.org/wiki/Polymerase), an enzyme responsible for transcribing DNA or MRNA, in other words a genetic logger.
 
 ## Build
 Build the static library:

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.16.3 FATAL_ERROR)
 project(
   merase
   LANGUAGES C CXX
-  VERSION "1.0.0"
-  DESCRIPTION "C logger for micro embedded systems"
+  VERSION "0.1.6"
+  DESCRIPTION "A simple C logger"
 )
 
 # cmake build guard

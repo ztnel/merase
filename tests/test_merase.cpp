@@ -28,15 +28,18 @@ FAKE_VALUE_FUNC1(int, fflush, FILE *);
 FAKE_VALUE_FUNC1(int, pthread_mutex_lock, pthread_mutex_t *)
 FAKE_VALUE_FUNC1(int, pthread_mutex_unlock, pthread_mutex_t *)
 
+#define FFF_FAKES_LIST(FAKE)  \
+  FAKE(fprintf)               \
+  FAKE(time)                  \
+  FAKE(vfprintf)              \
+  FAKE(fflush)                \
+  FAKE(pthread_mutex_lock)    \
+  FAKE(pthread_mutex_unlock)
+
 class TestMerase : public testing::Test {
   public:
     void SetUp() {
-      RESET_FAKE(fprintf);
-      RESET_FAKE(fflush);
-      RESET_FAKE(time);
-      RESET_FAKE(vfprintf);
-      RESET_FAKE(pthread_mutex_lock);
-      RESET_FAKE(pthread_mutex_unlock);
+      FFF_FAKES_LIST(RESET_FAKE);
       FFF_RESET_HISTORY();
       merase_set_level(DISABLE);
     }
@@ -70,8 +73,6 @@ TEST_F(TestMerase, TestLogging) {
     ASSERT_EQ(vfprintf_fake.arg0_val, fp);
     ASSERT_EQ(fprintf_fake.arg0_history[0], fp);
     ASSERT_EQ(strcmp(vfprintf_fake.arg1_val, fmt), 0);
-    ASSERT_EQ(pthread_mutex_lock_fake.call_count, 1);
-    ASSERT_EQ(pthread_mutex_unlock_fake.call_count, 1);
     ASSERT_EQ(time_fake.call_count, 1);
     ASSERT_EQ(fflush_fake.call_count, 1);
     ASSERT_EQ(fflush_fake.arg0_val, fp);
@@ -79,7 +80,5 @@ TEST_F(TestMerase, TestLogging) {
     RESET_FAKE(fflush);
     RESET_FAKE(time);
     RESET_FAKE(vfprintf);
-    RESET_FAKE(pthread_mutex_lock);
-    RESET_FAKE(pthread_mutex_unlock);
   }
 }

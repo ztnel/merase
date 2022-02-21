@@ -30,7 +30,10 @@ struct __std_log {
 
 // program log level (disable by default)
 static enum Level _level = DISABLE;
-static pthread_mutex_t s_mutx;
+// mutex for file consumption
+static pthread_mutex_t f_mutx;
+// mutex for accessing level
+static pthread_mutex_t l_mutx;
 static char *_get_level_str(enum Level level);
 static void _out(struct __std_log *stdl);
 
@@ -40,7 +43,9 @@ static void _out(struct __std_log *stdl);
  * @param level target logging level
  */
 void merase_set_level(enum Level level) {
+  pthread_mutex_lock(&l_mutx);
   _level = level;
+  pthread_mutex_unlock(&l_mutx);
 }
 
 /**
@@ -49,7 +54,10 @@ void merase_set_level(enum Level level) {
  * @return enum Level 
  */
 enum Level merase_get_level() {
-  return _level;
+  pthread_mutex_lock(&l_mutx);
+  enum Level lvl = _level;
+  pthread_mutex_unlock(&l_mutx);
+  return lvl;
 }
 
 /**
@@ -65,7 +73,7 @@ void merase_log(enum Level level, const char* func, int line, const char* fmt, .
   va_list args;
   va_start(args, fmt);
   // filter output by log level
-  if (_level > level) {
+  if (merase_get_level() > level) {
     return;
   }
   struct __std_log stdl;
@@ -107,11 +115,10 @@ static char *_get_level_str(enum Level level) {
 static void _out(struct __std_log *stdl) {
   time_t now = time(NULL);
   FILE *fp = stdl->fp;
-  pthread_mutex_lock(&s_mutx);
-  fprintf(fp, "%ld [%s]\t %s:%i ",
-    now, stdl->repr, stdl->func, stdl->line);
+  pthread_mutex_lock(&f_mutx);
+  fprintf(fp, "%ld [%s]\t %s:%i ", now, stdl->repr, stdl->func, stdl->line);
   vfprintf(fp, stdl->fmt, *stdl->argp);
   fprintf(fp, "\n\r");
   fflush(fp);
-  pthread_mutex_unlock(&s_mutx);
+  pthread_mutex_unlock(&f_mutx);
 }

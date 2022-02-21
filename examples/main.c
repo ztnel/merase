@@ -16,9 +16,9 @@
 
 int main(int argc, char **argv) {
   // load in log level from a build preset
-  logger_set_level(LOG_LEVEL);
+  merase_set_level(LOG_LEVEL);
   critical("Merase logging level set to %d", LOG_LEVEL);
-  error("Hello from Merase: A C logger for micro-embedded systems.");
+  error("Hello from Merase: A simple C logger.");
   warning("Merase is derived from polymerase, an enzyme for building DNA/RNA sequences");
   info("Contributions are welcome.");
   trace("Please contact me at christian@leapsystems.online if you have any questions.");
